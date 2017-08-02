@@ -7,7 +7,7 @@ output: word_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE, cache = TRUE)
 library(knitr)
 ```
 
@@ -15,7 +15,7 @@ La versión actual de este protocolo detalla una propuesta de geocodificación d
 
 Las herramientas de geocodificación utilizadas a lo largo del documento son libres y por tanto pueden ser usadas por todos los grupos. Además, estas herramientas pueden ser usadas tanto a través de la web como desde el software estadístico *R*, que automatiza el proceso de llamada a los servicios web que llevan a cabo la geocodificación. Indicaremos las páginas web a las que se debe acceder para proceder a la geocodificación y también se incluirá código de *R* que puede ser usado para tal fin sin necesidad de acceder manualmente a ninguna página web. Recomendamos, y a partir de ahora describimos, el uso de *R* para llevar a cabo estas tares de geocodificación. 
 
-Antes de comenzar con la descripción de las herramientas y procesos nos parece importante resaltar que el éxito de la geocodificación depende en gran medida de la calidad de las direcciones disponibles. En este sentido, es importante valorar la posibilidad de mejorar las mismas a partir de fuentes disponibles según la comunidad autónoma  (cruce con padrón a partir del DNI, cruce con algún sistema poblacional sanitario a partir del código de identificación sanitario, ...). Si no fuera posible realizar dicho cruce el procedimiento descrito seguiría siendo igualmente válido y, en la experiencia de los grupos de la Comunidad Valenciana, daría porcentajes de codificación más que aceptables.
+Antes de comenzar con la descripción de las herramientas y procesos nos parece importante resaltar que el éxito de la geocodificación depende en gran medida de la calidad de las direcciones disponibles. En este sentido, es importante valorar la posibilidad de mejorar las mismas a partir de fuentes disponibles según la comunidad autónoma (cruce con padrón a partir del DNI, cruce con algún sistema poblacional sanitario a partir del código de identificación sanitario, entre otras). Si no fuera posible realizar dicho cruce el procedimiento descrito seguiría siendo igualmente válido y, en la experiencia de los grupos de la Comunidad Valenciana, daría porcentajes de codificación más que aceptables.
 
 # Herramienta *CartoCiudad*
 
@@ -27,7 +27,7 @@ Accediendo a la sección de cálculos, desde la web de *CartoCiudad* o directame
 
 ## *CartoCiudad* desde R: librería *caRtociudad*
 
-La librería *caRtociudad* puede instalarse desde la web de *github* mediante el siguiente código de *R*:
+La librería *caRtociudad* puede instalarse desde la web de [*GitHub*](https://github.com/cjgb/caRtociudad) mediante el siguiente código de *R*:
 
 ```{r, eval=FALSE}
 if(!require(devtools)) install.packages("devtools")
@@ -35,45 +35,50 @@ library(devtools)
 library(httr)
 install_github("cjgb/caRtociudad")
 ```
-La función *install_github* puede dar problemas en algunas instituciones por la configuración del proxy. Si así lo fuera, hemos de configurar *R* para que solvente dichos problemas. En caso contrario los próximos pasos del protocolo pueden ser problemáticos dado que intentarán acceder vía web a *CartoCiudad* y, seguramente, no podrían hacerlo. Recuerda, el siguiente paso será sólo necesario si tienes problemas de conexión web por la configuración de tu red, en un domicilio particular (por ejemplo), sin restricciones de red seguramente no sería necesario. La configuración de *R* se realiza ejecutando la siguiente sentencia:
+La función *install_github* puede dar problemas en algunas instituciones por la configuración del proxy. Si así fuera, hemos de configurar *R* para que solvente dichos problemas. En caso contrario los próximos pasos del protocolo pueden ser problemáticos dado que intentarán acceder vía web a *CartoCiudad* y, seguramente, no podrían hacerlo. Recuerda, el siguiente paso será sólo necesario si tienes problemas de conexión web por la configuración de tu red, en un domicilio particular (por ejemplo), sin restricciones de red seguramente no sería necesario. La configuración de *R* se realiza ejecutando la siguiente sentencia:
 
 ```{r, eval=FALSE,message=FALSE,comment=FALSE,error=FALSE}
-httr::set_config(httr::use_proxy(
-  url      = "XXX.XXX.XXX.XX",
-  port     = XXXX,
-  username = "XXXX",
-  password = "XXXX"
+httr::set_config(
+  httr::use_proxy(
+    url      = "XXX.XXX.XXX.XX",
+    port     = XXXX,
+    username = "XXXX",
+    password = "XXXX"
 ))
 ```
 
-donde *url* es la dirección IP o dirección web del proxy de vuestra red, *port* es el puerto que vuestra institución utilice para comunicaciones y *username* y *password* las credenciales de acceso, si fueran necesarias. Si no necesitais identificar usuario y contraseña en vuestra red quitar dichos arcumentos de la sentencia anterior. Los valores de nuestra red los hemos enmascarado por seguridad. Las comillas, allá donde aparecen son necesarias. Vuestros servicios de informática (suponemos que) podrán proporcionaros información con más detalle sobre estos valores para vuestras redes informáticas corporativas.
+donde *url* es la dirección IP o dirección web del proxy de vuestra red, *port* es el puerto que vuestra institución utilice para comunicaciones y *username* y *password* las credenciales de acceso, si fueran necesarias. Si no necesitáis identificar usuario y contraseña en vuestra red quitar dichos argumentos de la sentencia anterior. Los valores de nuestra red los hemos enmascarado por seguridad. Las comillas, allá donde aparecen son necesarias. Vuestros servicios de informática (suponemos que) podrán proporcionaros información con más detalle sobre estos valores para vuestras redes informáticas corporativas.
 
 Una vez instalada y cargada la librería (y configurado en *R* el acceso al proxy si fuera necesario) es muy sencillo geocodificar cualquier dirección. A continuación se muestra un ejemplo simple de uso:
 
-```{r, eval=FALSE,message=FALSE,comment=FALSE,error=FALSE}
+```{r, eval = FALSE, message=FALSE,comment=FALSE,error=FALSE}
 library(caRtociudad)
-cartociudad_geocode("Plaza del Ayuntamiento, 1, Valencia, Valencia, 46002")
+cartociudad_geocode("Plaza del Ayuntamiento 1, Valencia, Valencia, 46002")
 ```
 
 La salida que proporciona la función es la siguiente:
 
-![](figuras/salida_caRtociudad.png)
+```{r, message=FALSE,comment=FALSE,error=FALSE, echo=FALSE}
+library(caRtociudad)
+cartociudad_geocode("Plaza del Ayuntamiento 1, Valencia, Valencia, 46002")
+```
 
+El resultado contiene información que identifica el lugar o lugares geocodificados, en caso de solicitar la geocodificación para más de una dirección. En el campo **`state`** contiene información sobre la confianza/precisión de las coordenadas proporcionadas. Esta variable **`state`** puede tomar como valor:
 
-El resultado contiene información que identifica el lugar o lugares geocodificados, en el caso de que haya más de una propuesta para una misma dirección. En el campo **`priority`** se devuelve el valor **`1`** cuando hay un único resultado, y se establece el orden del más probable al menos probable cuando hay varias propuestas. Por otro lado, el campo **`status`** contiene información sobre la confianza/precisión de las coordenadas proporcionadas. Esta variable **`status`** puede tomar como valor:
+- **1**: Resultado exacto.
+- **2**: Portal par no encontrado, se devuelve el par más cercano. En el campo `portalNumber`  nos reporta qué portal nos ha dado.
+- **3**: Portal impar no encontrado, se devuelve el impar más cercano. En el campo `portalNumber`  nos reporta qué portal nos ha dado.
+- **4**: Punto kilométrico no encontrado, se devuelve el más próximo.
+- **5**: No se encuentran portales o puntos kilométricos asociados al vial.
+- **6**: El tipo de vía encontrado no coincide con el solicitado en la consulta.
+- **10**: No encuentra resultados, pero devuelve la entidad superior (normalmente será el municipio).
 
-- **1** : *Portal/Pk encontrado*
-- **2** : *Portal/Pk no encontrado*. Se devuelve el más cercano encontrado. En el campo `numpk_name`  nos reporta qué portal nos ha dado.
-- **3** : *Portal/Pk no encontrado*. Se devuelve el inicial de la vía
-- **4** : *Municipio encontrado*, pero no la vía
-- **0** : Recoge diferentes situaciones. Por un lado vías encontradas que no tienen números asociados (entendemos que en su sistema), y por otro viales no encontrados. Devuelve el comentario *El vial encontrado (NOMBRE DEL VIAL) no tiene Portal/Pk asociados* o el comentario *Vial no encontrado*. En el primer caso devuelve una geocodificación (que corresponde a un punto central del municipio habitualmente), en el segundo no devuelve ninguna geocodificación. Los códigos de status mñas habituales, de largo, son los `1`, `2` y `0`.
-
-En los campos **`longitude`** y **`latitude`** disponemos de la longitud y la latitud devuelta por *CartoCiudad*. Esta información (longitud, latitud y el resto de campos mencionados) puede ser almacenada en un banco de datos, junto con el resto de información disponible en la base de datos de mortalidad.
+En los campos **`lng`** y **`lat`** disponemos de la longitud y la latitud devuelta por *CartoCiudad*. Esta información (longitud, latitud y el resto de campos mencionados) puede ser almacenada en un banco de datos, junto con el resto de información disponible en la base de datos de mortalidad.
 
 ## Normalización direcciones para *CartoCiudad*.
 
 En el documento que se encuentra en [http://www.idee.es/resources/presentaciones/JIIDE10/ID449_Servicio_web_de_Geocodificacion_para_Cartociudad.pdf](http://www.idee.es/resources/presentaciones/JIIDE10/ID449_Servicio_web_de_Geocodificacion_para_Cartociudad.pdf)
-se comentan algunos detalles interesantes sobre el servicio web de geocodificación con *CartoCiudad*. Entre otros detalles se describe qué formato se recomienda para las direcciones que queramos geocodificar. Existe la posibilidad de enviar a geocodificar una dirección separando cada elemento de la misma en una variable distinta que pasaremos a la función **`geocode`**, o hacerlo de forma libre mediante una única cadena de texto. En nuestra experiencia la segunda forma, la de texto libre, nos ha reportado alguna mejora en los resultados. En ocasiones, la información en alguno de nuestros registros a geocodificar no está exactamente en el campo que debiera pudiendo tener por ejemplo el tipo de vía vacío y en el nombre de vía tener tanto el tipo como el nombre. Por este motivo nuestra recomendación es optar por esta segunda forma, el texto libre.
+se comentan algunos detalles interesantes sobre el servicio web de geocodificación con *CartoCiudad*. Entre otros detalles se describe qué formato se recomienda para las direcciones que queramos geocodificar, aunque en todo caso deberá ser una única cadena de texto que pasaremos a la función **`geocode`**.
 
 El motor de búsqueda de *CartoCiudad* realiza una normalización de las direcciones antes de proceder a la geocodificación. Este proceso realiza transformaciones como eliminar tildes y caracteres raros, pasar todas las letras a minúsculas, eliminar palabras que no aportan información como artículos o pronombres y estandarizar los tipos de vía. Para estandarizar los tipos de vía dispone de unas tablas de equivalencias en las que, por ejemplo, tanto da *AV* como *AVDA* para representar el tipo de vía *AVENIDA*. 
 
@@ -89,17 +94,17 @@ En resumen el procedimiento de extracción de información de *CartoCiudad* a pa
 
 4. Extracción del **nombre del municipio**. *CartoCiudad* espera este valor al **final** de la cadena de texto resultante de los pasos anteriores. Si se hubiera encontrado y extraído la provincia se acotaría la búsqueda (exacta o aproximada de los municipios) a aquellos municipios de la citada provincia. Si no se encuentra el municipio pero sí se tiene la provincia, *CartoCiudad* considera que la provincia es también el municipio. Si se encuentra el municipio se extrae y elimina de la cadena de texto.
 
-5. Extracción del **número de policía**. Se busca este valor al **final** de la cadena de texto. Si se encuentra un valor numérico en dicha posición se extrae y elimina de la cadena de texto.
+5. Extracción del **número de portal o pk**. Se busca este valor al **final** de la cadena de texto. Si se encuentra un valor numérico en dicha posición se extrae y elimina de la cadena de texto.
 
 6. Extracción del **nombre de la vía**. Será la cadena resultante de la sustracciones realizadas en todos los pasos anteriores. 
 
 Con este algoritmo *CartoCiudad* extrae las componentes relevantes de la cadena de texto y utiliza dichos valores para geocodificar la dirección correspondiente. Así, en resumen, en base al procedimiento que acabamos de describir recomendamos estructurar la direcciones a geocodificar como cadenas de texto estructuradas en el siguiente orden:
 
-**`(TIPO DE VÍA) (NOMBRE DE LA VÍA), (NÚMERO DE PORTAL), (NOMBRE DE MUNICIPIO), (NOMBRE DE PROVINCIA) , (CÓDIGO POSTAL)`**
+**`(TIPO DE VÍA) (NOMBRE DE LA VÍA) (NÚMERO DE PORTAL), (NOMBRE DE MUNICIPIO), (NOMBRE DE PROVINCIA) , (CÓDIGO POSTAL)`**
 
 Por ejemplo:
 
-**`AVENIDA CORTES VALENCIANAS, 18, VALENCIA, VALENCIA, 46015`**
+**`AVENIDA CORTES VALENCIANAS 18, VALENCIA, VALENCIA, 46015`**
 
 En caso de no disponer de alguno de estos datos se puede dejar en blanco ya que, si éstos se introducen en el orden sugerido, *CartoCiudad* los interpretará de forma correcta, aparezcan o no de forma explícita en las cadenas de texto correspondientes. 
 
@@ -124,7 +129,7 @@ Una vez instalada y cargada la librería es muy sencillo geocodificar cualquier 
 
 ```{r, eval=FALSE,message=FALSE,comment=FALSE,error=FALSE}
 library(ggmap)
-geocode("Plaza del Ayuntamiento, 1, Valencia, Valencia, 46002", output="all", source="google")
+geocode("Plaza del Ayuntamiento 1, Valencia, Valencia, 46002", output="all", source="google")
 ```
 
 La salida que proporciona esta función contendrá más o menos información en función del valor del parámetro `output`. Este parámetro puede tomar los valores *`latlon`*, *`latlona`*, *`more`* o *`all`*. La última de estas opciones devuelve toda la información que *Google* dispone sobre la dirección encontrada en su sistema, permitiéndonos seleccionar aquellas componentes que nos interesen. La salida estará formada por dos objetos, *`results`* y *`status`*. En *`results`* aparecerá la información referente a la geocodificación realizada, entre la que se encuentran la latitud y la longitud (las dos variables de interés principal), o estará vacío si la dirección no ha sido identificada. En *`status`* aparecerá la información referente al éxito o no de la geocodificación, pudiendo devolver los siguientes valores:
@@ -151,8 +156,12 @@ En la página web [https://developers.google.com/maps/documentation/geocoding/in
 Una vez introducidas las herramientas de geocodificación que consideramos adecuadas para la geocodificación de la información del proyecto MEDEA presentamos un banco de datos de ejemplo de la Comunidad Valenciana en el que vamos a mostrar cómo se podría geocodificar las direcciones allí contenidas. Puedes acceder al archivo `.Rdata` que contiene este banco de datos en el subdirectorio "/datos/Ejemplo.RData" de este proyecto. Nuestro banco de datos de ejemplo (con 30 registros) tiene la estructura que se muestra a continuación:
 ```{r echo=FALSE, eval=TRUE}
 load("datos/Ejemplo.RData")
-colnames(ejemplo2)<-c("TVIA","NVIA","NUMEROPOLI","MUNICIPIO","PROVINCIA","CP","DIREC")
-kable(ejemplo2[c(1:10,26:30),1:6])
+source("scripts/limpiaTVIA.r")
+source("scripts/normalizaCODPOSTAL.r")
+source("scripts/normalizaNVIA.r")
+colnames(ejemplo2) <- c("TVIA", "NVIA", "NUMEROPOLI", "MUNICIPIO", "PROVINCIA", "CP", "DIREC")
+ejemplo2 <- as.data.frame(sapply(ejemplo2, iconv, from = "latin1", to = "UTF-8"))
+kable(ejemplo2[c(1:10, 26:30), 1:6])
 ```
 
 Tal y como ya hemos anticipado en algún momento optaremos por *CartoCiudad* como primera opción para la geocodificación y el servicio de *Google*, como segunda opción, sólo para aquellas direcciones que no sean geocodificadas de forma satisfactoria por *CartoCiudad*. A continuación describimos ambos procesos para nuestros datos de ejemplo precedidos de una fase de preproceso de los datos.
@@ -166,45 +175,25 @@ La casuística de las funciones anteriores se ha definido según la experiencia 
 
 A continuación mostramos como se podrían aplicar las funciones anteriores al preproceso de los datos de nuestro ejemplo y como montamos un campo de texto libre que contiene una cadena por cada dirección a geocodificar. El formato de esta cadena es el sugerido en las secciones anteriores de este protocolo.
 ```{r}
-ejemplo2$TVIA<-sapply(ejemplo2$TVIA,limpiaTVIA)
-ejemplo2$NVIA<-sapply(ejemplo2$NVIA,normalizaNVIA)
-ejemplo2$CP<-sapply(ejemplo2$CP,normalizaCODPOSTAL)
+ejemplo2$TVIA <- sapply(ejemplo2$TVIA, limpiaTVIA)
+ejemplo2$NVIA <- sapply(ejemplo2$NVIA, normalizaNVIA)
+ejemplo2$CP   <- sapply(ejemplo2$CP, normalizaCODPOSTAL)
 
-ejemplo2$DIREC<-paste(ejemplo2$TVIA," ",ejemplo2$NVIA,", ",ejemplo2$NUMEROPOLI,", ", ejemplo2$MUNICIPIO," , ",ejemplo2$PROVINCIA, ",", ejemplo2$CP, sep="")
-
+ejemplo2$DIREC <- with(ejemplo2, paste(TVIA, NVIA, NUMEROPOLI, ", ",
+                                       MUNICIPIO, ", ", PROVINCIA, ", ", CP))
 ```
 
 ## *caRtociudad*
-A continuación describimos el proceso en el que, para nuestro ejemplo, generamos una estructura de datos anexa al data.frame *`ejemplo2`* original que nos permitirá guardar la información que nos devuelva *caRtociudad* y lanzamos la geocodificación.
+A continuación, las siguientes sentencias mandan a geocodificar cada una de las direcciones de *`ejemplo2`* y guardan la información original de cada dirección en el data.frame *`resultados_cartociudad`*
+
 ```{r}
 library(caRtociudad)
-
-#Creamos la estructura para recoger la información que proporciona CartoCiudad
-direcgeo<-data.frame(matrix(nrow=dim(ejemplo2)[1],ncol=14))
-#Para diferenciar que esta información es la proporcionada por CartoCiudad añadimos al nombre de las columnas que devolverá CartoCiudad la pablabra "carto"
-colnames(direcgeo)<-paste("carto",c("priority","status","comments","province","municipality",
-                                    "road_type","road_name","road_fid","numpk_name","zip","numpk_fid",
-                                    "longitude","latitude","numdirec"),sep=".")
-
-#Anexionamos esta estructura a nuestro banco de datos original
-ejemplo2<-data.frame(ejemplo2,direcgeo)
+resultados_cartociudad <- cartociudad_geocode(ejemplo2$DIREC)
 ```
 
-A continuación, las siguientes sentencias mandan a geocodificar cada una de las direcciones de *`ejemplo2`* y guardan la información original de cada dirección en el propio data.frame *`ejemplo2`*
-```{r}
-#Aquí mostramos cómo hacerlo dirección a dirección, aunque se podría enviar bloques de direcciones
-for (i in 1:dim(ejemplo2)[1]){
-  direc<-ejemplo2$DIREC[i]
-  aux<-cartociudad_geocode(direc)
-  ejemplo2[i,colnames(direcgeo)]<-aux[1,]
-  cat(paste(i,aux$status[1],"\n"))
-}
+Notar que la función se ejecuta en bucle para cada una de las direcciones disponibles.
 
-```
-
-Notar que el bucle anterior se ejecuta de forma individual para cada una de las direcciones disponibles cuando *CartoCiudad* admite la posibilidad de hacer esta labor para bloques de hasta 100 direcciones. En general preferimos ejecutar el bucle dirección a dirección ya que en caso de que el proceso diera algún error en algún momento (ya sea por fallo de la red o de *CartoCiudad*) y parara el bucle, habríamos guardado toda la información hasta ese punto. En caso de geocodificar en bloque un conjunto de direcciones si el proceso fallara no devolvería ninguna información para ninguna de las direcciones del bloque.
-
-Consultando el objeto `ejemplo2$carto.status` podemos valorar el éxito de la geocodificación llevada a cabo. En nuestro ejemplo, con 30 registros, 13 de ellos han obtenido status `1`, 7 registros han obtenido status `2` y 10 tienen status `0`. Daremos por geocodificados los 20 primeros mientras que los 10 últimos intentaremos su geocodificación con la herramienta de *Google*.
+Consultando el objeto `resultados_cartociudad$state` podemos valorar el éxito de la geocodificación llevada a cabo. En nuestro ejemplo, con 30 registros, 14 de ellos han obtenido *state* igual `1`, uno obtuvo *state* de `2`, tres obtuvieron state igual a `3`, y diez tienen state igual a `10`. Daremos por geocodificados los 20 primeros mientras que los 10 últimos intentaremos su geocodificación con la herramienta de *Google*.
 
 ## *Google*
 De la misma forma que para *CartoCiudad*, en primer lugar mostramos unas sentencias de código que generan una estructura de datos adecuada para contener la información devuelta por la herramienta de *Google*.
